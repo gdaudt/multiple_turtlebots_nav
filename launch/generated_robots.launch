@@ -13,32 +13,15 @@
   <group ns="$(arg robot1_prefix)">
     <param name="tf_prefix" value="$(arg robot1_prefix)" />
     <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 7 -y 1 -z 0" />
+      <arg name="init_pose" value="-x 0 -y 0 -z 0" />
       <arg name="robot_name"  value="robot1" />
       <arg name="model" value="$(arg model)"/>
       <arg name="set_base_frame" value="$(arg robot1_prefix)/base_footprint"/>
       <arg name="set_odom_frame" value="$(arg robot1_prefix)/odom"/>
       <arg name="set_scan_frame" value="$(arg robot1_prefix)/base_scan"/>
       <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="7"/>
-      <arg name="initial_pose_y" default="1"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot2-->
-  <arg name="robot2_prefix" value="robot2"/> 
-  <group ns="$(arg robot2_prefix)">
-    <param name="tf_prefix" value="$(arg robot2_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x -7 -y 1 -z 0" />
-      <arg name="robot_name"  value="robot2" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot2_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot2_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot2_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="-7"/>
-      <arg name="initial_pose_y" default="1"/>
+      <arg name="initial_pose_x" default="0"/>
+      <arg name="initial_pose_y" default="0"/>
       <arg name="initial_pose_a" default="0"/>   
     </include>
   </group>

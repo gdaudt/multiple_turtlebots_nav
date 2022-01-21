@@ -58,7 +58,7 @@ generatedFile.close()
 
 # generate the rviz file for visualization
 # rviz_block1 -> rviz_TFtree 1(loop), 2, 3(loop) -> rviz_block2 -> rviz_group(loop) -> rviz_block3
-rviz_file = open('../navigation/navigation.rviz', 'w')
+rviz_file = open('../navigation/multiple_turtlebots.rviz', 'w')
 rb1 = open('../misc/rviz_block1.rviz', 'r')
 rvizblock1 = rb1.read()
 aux = rvizblock1.replace('robot', robotName)

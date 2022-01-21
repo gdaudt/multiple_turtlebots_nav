@@ -16,7 +16,7 @@
 
      <!-- launch the overall visualization on rviz -->
     <node pkg="rviz" type="rviz" name="rviz" required="true"
-          args="-d $(find multiple_turtlebots_nav)/navigation/navigation.rviz"/>
+          args="-d $(find multiple_turtlebots_nav)/navigation/multiple_turtlebots.rviz"/>
 
 
     <!-- rostopic pub /robot1/move_base_simple/goal geometry_msgs/PoseStamped '{header: {stamp: now, frame_id: "map"}, pose: {position: {x: 7.0, y: 1.0, z: 0.0}, orientation: {w: 1.0}}}'
