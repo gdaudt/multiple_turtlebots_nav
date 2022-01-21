@@ -1,0 +1,25 @@
+<launch>
+  <param name="/use_sim_time" value="true"/>
+
+  <!-- Run the map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find my_mapping_launcher)/config/my_map.yaml" >
+    <param name="frame_id" value="map" />
+  </node>
+
+ <!-- Properties of each robot      -->
+
+  <!-- AMCL      -->
+
+    <include file="$(find multiple_turtlebots_nav)/launch/amcl_robot1.launch" />
+    <include file="$(find multiple_turtlebots_nav)/launch/amcl_robot2.launch" />
+    <include file="$(find multiple_turtlebots_nav)/launch/amcl_robot3.launch" />      
+  
+    <include file="$(find my_mapping_launcher)/launch/my_gmapping.launch">
+      <arg name="scan_topic"      value="/robot1/kobuki/laser/scan"/>
+      <arg name="base_frame"  default="robot1_tf/base_footprint"/>
+      <arg name="odom_frame"  default="robot1/odom"/>
+<!-- Launching Rviz      -->
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find my_mapping_launcher)/rviz/navigation.rviz" />
+
+</launch>
