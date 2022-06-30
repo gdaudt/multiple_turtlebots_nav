@@ -77,8 +77,7 @@
     <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
     <remap from="odom" to="$(arg odom_topic)"/>
-    <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
-    
+    <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />    
     <param name="local_costmap/scan/sensor_frame"   value="$(arg set_scan_frame)"/>
     <param name="local_costmap/global_frame"        value="$(arg set_odom_frame)"/>
     <param name="local_costmap/robot_base_frame"    value="$(arg set_base_frame)"/>
