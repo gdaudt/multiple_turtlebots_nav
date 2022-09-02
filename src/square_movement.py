@@ -2,6 +2,7 @@ import rospy
 import math
 import actionlib
 import numpy as np
+from enum import Enum
 
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from std_msgs.msg import String
@@ -10,6 +11,11 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Point, Twist
 from nav_msgs.msg import OccupancyGrid
 
+class Movement(Enum):
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
 
 class Robot:
     def __init__(self):
@@ -21,9 +27,6 @@ class Robot:
         self.goal = (0.0,0.0)
         self.path = 0
         self.name = "robot"
-    
-    def stop(self):
-        self.publisher.publish(Twist())
 
 class Map:
     def __init__(self):
@@ -32,39 +35,31 @@ class Map:
         self.originx = 0
         self.originy = 0
         self.resolution = 0
-
-# robot1Pose = 0
-# robot2Pose = 0
-# robot3Pose = 0
-# r1yaw, r2yaw, r3yaw = 0, 0, 0
-# r1index, r2index, r3index = 0, 0, 0 
 r1 = Robot()
 r2 = Robot()
 r3 = Robot()
-robots = [r1, r2, r3]
 map = Map()
-path1 = np.array([[2.000000,-1.600000],[2.000000,-2.000000],[2.000000,-2.400000],[2.000000,-2.800000],[2.000000,-3.200000],[2.000000,-3.600000],[2.000000,-4.000000],[2.000000,-4.400000],[1.600000,-4.400000],[1.200000,-4.400000],[1.200000,-4.800000],[0.800000,-4.800000],[0.400000,-4.800000],[0.000000,-4.800000],[-0.400000,-4.800000],[-0.800000,-4.800000],[-1.200000,-4.800000],[-1.600000,-4.800000],[-2.000000,-4.800000],[-2.400000,-4.800000],[-2.800000,-4.800000],[-3.200000,-4.800000],[-3.600000,-4.800000],[-3.600000,-4.400000],[-4.000000,-4.400000],[-4.400000,-4.400000]])
-path2 = np.array([[2.000000,-0.400000],[2.000000,-0.800000],[2.400000,-0.800000],[2.800000,-0.800000],[3.200000,-0.800000], [2.000000,-0.400000],[2.000000,-0.800000],[2.400000,-0.800000],[2.800000,-0.800000],[3.200000,-0.800000]])
-path3 = np.array([[2.000000,0.800000],[2.000000,0.400000],[2.000000,0.000000],[2.000000,-0.400000],[2.000000,-0.800000],[2.000000,-1.200000],[2.000000,-1.600000],[1.600000,-1.600000],[1.200000,-1.600000],[1.200000,-2.000000],[0.800000,-2.000000],[0.400000,-2.000000],[0.000000,-2.000000],[-0.400000,-2.000000],[-0.800000,-2.000000],[-1.200000,-2.000000],[-1.600000,-2.000000],[-2.000000,-2.000000],[-2.400000,-2.000000],[-2.800000,-2.000000],[-3.200000,-2.000000],[-3.600000,-2.000000],[-3.600000,-1.600000],[-4.000000,-1.600000],[-4.400000,-1.600000]])
-# copy all paths and replace all negative values with positive ones
-threshold = 0.2
+path1 = [Movement.UP, Movement.UP, Movement.UP, Movement.LEFT, Movement.UP, Movement.UP, Movement.UP]
+path2 = [Movement.UP, Movement.UP, Movement.UP, Movement.UP, Movement.UP, Movement.UP, Movement.UP, Movement.RIGHT, Movement.UP, Movement.UP]
+path3 = [Movement.UP, Movement.UP, Movement.UP, Movement.RIGHT, Movement.UP, Movement.UP, Movement.UP, Movement.LEFT, Movement.UP, Movement.UP, Movement.RIGHT, Movement.UP]
+threshold = 0.3
+kP = 0.5
 setup = True
-
 
 def euclidianDistance(goal, rx, ry):
     return math.sqrt(pow((goal[0] - rx), 2) + pow((goal[1] - ry), 2))
 
-def linearVel(goal, rx, ry, limit, constant=0.4):
-    return np.clip(constant * euclidianDistance(goal, rx, ry), 0, limit)
+def linearVel(goal, rx, ry, constant=1):
+    return constant * euclidianDistance(goal, rx, ry)
 
 def steeringAngle(goal, rx, ry):
-    print("steeringAngle: ", math.degrees(math.atan2(goal[1] - ry, goal[0] - rx))+ math.radians(90)) 
+    # print("steeringAngle: ", math.degrees(math.atan2(goal[0] - rx, goal[1] - ry))+ math.radians(90)) 
     return math.atan2(goal[1] - ry, goal[0] - rx)
 
-def angularVel(goal, rx, ry, robotYaw, limit, constant=2):
-    print("vel in degrees: ", math.degrees(constant * steeringAngle(goal, rx, ry) - robotYaw))
-    print("yaw in degrees: ", math.degrees(robotYaw))
-    return np.clip(constant * (steeringAngle(goal, rx, ry) - robotYaw), -limit, limit)
+def angularVel(goal, rx, ry, robotYaw, constant=2):
+    # print("vel in degrees: ", math.degrees(constant * steeringAngle(goal, rx, ry) - robotYaw))
+    # print("yaw in degrees: ", math.degrees(robotYaw))
+    return constant * (steeringAngle(goal, rx, ry) - robotYaw)
 
 def transformCoordinateOdomToMap(x, y): 
     j = y / map.resolution - map.originy / map.resolution
@@ -97,21 +92,21 @@ def moveRobot(robot):
     # print("angle difference: ", math.degrees(steeringAngle(robot.goal, robot.x, robot.y)))
     # difference = math.degrees(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)))
     # print("difference: ", difference)
-    # if(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)) > 0.02):
-    #     angularSpeed(robot)
-    #     #linearSpeed(robot)
-    # else:
-    #     angularSpeed(robot)                
-    #     linearSpeed(robot)
-    speed = Twist()
-    robot.goal = (robot.path[robot.index][0], robot.path[robot.index][1])
-    speed.linear.x = linearVel(robot.goal, robot.x, robot.y, 0.3)
-    speed.angular.z = angularVel(robot.goal, robot.x, robot.y, robot.yaw, 1.2)
-    robot.publisher.publish(speed)
-    # print(robot.name, "speed: ", speed)
+    if(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)) > 0.02):
+        angularSpeed(robot)
+        #linearSpeed(robot)
+    else:
+        angularSpeed(robot)                
+        linearSpeed(robot)
+    
     print(robot.name, "going to: ", robot.goal)
     print(robot.name, "at: ", robot.x, ",", robot.y)            
-    checkRobotGoalReached(robot)  
+    checkRobotGoalReached(robot)    
+    
+# def testAngular(robot):
+#     speed = Twist()
+#     speed.angular.z = 0.1
+#     robot.publisher.publish(speed)
     
 def linearSpeed(robot):
     speed = Twist()
@@ -127,7 +122,22 @@ def linearSpeed(robot):
     else:
         speed.linear.x = 0
     robot.publisher.publish(speed)
+ 
+def rotate_robot(robot, angle):
+    target_rad = math.radians(angle)
+    ang_speed = kP * (target_rad - robot.yaw)
+    return ang_speed
+
+# move up on 0.4 ms for 1 second
+def move_up(robot):
+    speed = Twist() 
+    speed.linear.x = 0.4
+    robot.publisher.publish(speed)
+    rospy.sleep(1)
+    speed.linear.x = 0.0
+    robot.publisher.publish(speed) 
     
+   
 def angularSpeed(robot):
     speed = Twist()
     robot.goal = (robot.path[robot.index][0], robot.path[robot.index][1])
@@ -154,8 +164,24 @@ def checkRobotGoalReached(robot):
             robot.index += 1            
         else:            
             robot.publisher.publish(speed)
-            rospy.loginfo(robot.name + " reached goal") 
-            
+            rospy.loginfo(robot.name + " reached goal")  
+        
+
+def setGoal(goal, x, y):    
+    goal.target_pose.header.frame_id = "map"
+    goal.target_pose.header.stamp = rospy.Time.now()
+    goal.target_pose.pose.position.x = x
+    goal.target_pose.pose.position.y = y    
+    goal.target_pose.pose.orientation.w = 1.0
+    
+def setGoal(goal, x, y, robot):    
+    goal.target_pose.header.frame_id = "map"
+    goal.target_pose.header.stamp = rospy.Time.now()
+    goal.target_pose.pose.position.x = x
+    goal.target_pose.pose.position.y = y    
+    goal.target_pose.pose.orientation.w = 1.0
+    robot.goal = (x, y)
+        
 def cbpose1(data):
     global r1
     r1.x = data.pose.pose.position.x
@@ -195,20 +221,17 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
        # Initializes a rospy node to let the SimpleActionClient publish and subscribe 
         map_sub = rospy.Subscriber('/map', OccupancyGrid, map_callback)       
-        sub1 = rospy.Subscriber('/robot1/ground_truth/state', Odometry, cbpose1)
-        sub2 = rospy.Subscriber('/robot2/ground_truth/state', Odometry, cbpose2)
-        sub3 = rospy.Subscriber('/robot3/ground_truth/state', Odometry, cbpose3)        
+        sub1 = rospy.Subscriber('/robot1/odom', Odometry, cbpose1)
+        sub2 = rospy.Subscriber('/robot2/odom', Odometry, cbpose2)
+        sub3 = rospy.Subscriber('/robot3/odom', Odometry, cbpose3)        
         if setup:
             # path_demo()
             setupRobots()
             setup = False
         if(map.resolution != 0):
-            #iterate through all robots in robots vector, if they are not at their goal, move them
-            for robot in robots:
-                if(robot.index < len(robot.path) -1):
-                    moveRobot(robot)
-                else:
-                    robot.stop()  
+            moveRobot(r1)
+            moveRobot(r2)
+            moveRobot(r3)   
         rate.sleep()
     
     
