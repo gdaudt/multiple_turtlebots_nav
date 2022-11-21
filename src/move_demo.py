@@ -2,6 +2,7 @@ import rospy
 import math
 import actionlib
 import numpy as np
+import utils
 
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from std_msgs.msg import String
@@ -19,7 +20,7 @@ class Robot:
         self.publisher = 0
         self.id = 0
         self.goal = (0.0,0.0)
-        self.path = 0
+        self.path = []
         self.name = "robot" + str(self.id)
     #method to initialize all variables receiving them as parameters
     def init(self, index, name, publisher):
@@ -44,9 +45,10 @@ r1 = Robot()
 r2 = Robot()
 r3 = Robot()
 map = Map()
-path1 = np.array([[2.000000,-1.600000],[2.000000,-2.000000],[2.000000,-2.400000],[2.000000,-2.800000],[2.000000,-3.200000],[2.000000,-3.600000],[2.000000,-4.000000],[2.000000,-4.400000],[1.600000,-4.400000],[1.200000,-4.400000],[1.200000,-4.800000],[0.800000,-4.800000],[0.400000,-4.800000],[0.000000,-4.800000],[-0.400000,-4.800000],[-0.800000,-4.800000],[-1.200000,-4.800000],[-1.600000,-4.800000],[-2.000000,-4.800000],[-2.400000,-4.800000],[-2.800000,-4.800000],[-3.200000,-4.800000],[-3.600000,-4.800000],[-3.600000,-4.400000],[-4.000000,-4.400000],[-4.400000,-4.400000]])
-path2 = np.array([[2.000000,-0.400000],[2.000000,-0.800000],[2.400000,-0.800000],[2.800000,-0.800000],[3.200000,-0.800000]])
-path3 = np.array([[2.000000,0.800000],[2.000000,0.400000],[2.000000,0.000000],[2.000000,-0.400000],[2.000000,-0.800000],[2.000000,-1.200000],[2.000000,-1.600000],[1.600000,-1.600000],[1.200000,-1.600000],[1.200000,-2.000000],[0.800000,-2.000000],[0.400000,-2.000000],[0.000000,-2.000000],[-0.400000,-2.000000],[-0.800000,-2.000000],[-1.200000,-2.000000],[-1.600000,-2.000000],[-2.000000,-2.000000],[-2.400000,-2.000000],[-2.800000,-2.000000],[-3.200000,-2.000000],[-3.600000,-2.000000],[-3.600000,-1.600000],[-4.000000,-1.600000],[-4.400000,-1.600000]])
+# path1 = np.array([[2.000000,-1.600000],[2.000000,-2.000000],[2.000000,-2.400000],[2.000000,-2.800000],[2.000000,-3.200000],[2.000000,-3.600000],[2.000000,-4.000000],[2.000000,-4.400000],[1.600000,-4.400000],[1.200000,-4.400000],[1.200000,-4.800000],[0.800000,-4.800000],[0.400000,-4.800000],[0.000000,-4.800000],[-0.400000,-4.800000],[-0.800000,-4.800000],[-1.200000,-4.800000],[-1.600000,-4.800000],[-2.000000,-4.800000],[-2.400000,-4.800000],[-2.800000,-4.800000],[-3.200000,-4.800000],[-3.600000,-4.800000],[-3.600000,-4.400000],[-4.000000,-4.400000],[-4.400000,-4.400000]])
+# path2 = np.array([[2.000000,-0.400000],[2.000000,-0.800000],[2.400000,-0.800000],[2.800000,-0.800000],[3.200000,-0.800000]])
+# path3 = np.array([[2.000000,0.800000],[2.000000,0.400000],[2.000000,0.000000],[2.000000,-0.400000],[2.000000,-0.800000],[2.000000,-1.200000],[2.000000,-1.600000],[1.600000,-1.600000],[1.200000,-1.600000],[1.200000,-2.000000],[0.800000,-2.000000],[0.400000,-2.000000],[0.000000,-2.000000],[-0.400000,-2.000000],[-0.800000,-2.000000],[-1.200000,-2.000000],[-1.600000,-2.000000],[-2.000000,-2.000000],[-2.400000,-2.000000],[-2.800000,-2.000000],[-3.200000,-2.000000],[-3.600000,-2.000000],[-3.600000,-1.600000],[-4.000000,-1.600000],[-4.400000,-1.600000]])
+
 threshold = 0.3
 # robot1 = actionlib.SimpleActionClient('robot1/move_base', MoveBaseAction)
 # robot2 = actionlib.SimpleActionClient('robot2/move_base', MoveBaseAction)
@@ -70,31 +72,15 @@ def steeringAngle(goal, rx, ry):
 def angularVel(goal, rx, ry, robotYaw, limit, constant=2):
     print("vel in degrees: ", math.degrees(constant * steeringAngle(goal, rx, ry) - robotYaw))
     print("yaw in degrees: ", math.degrees(robotYaw))
-    return np.clip(constant * (steeringAngle(goal, rx, ry) - robotYaw), -limit, limit)
-
-def transformCoordinateOdomToMap(x, y): 
-    j = y / map.resolution - map.originy / map.resolution
-    i = x / map.resolution - map.originx / map.resolution
-    return (i, j);  
-  
-def transformCoordinateMapToOdom(x, y):
-    global map
-    print(map.resolution, map.originx, map.originy)
-    i = (x + map.originx / map.resolution) * map.resolution
-    j = (y + map.originy / map.resolution) * map.resolution
-    return (i, j)  
+    return np.clip(constant * (steeringAngle(goal, rx, ry) - robotYaw), -limit, limit) 
 
 def setupRobots():
     global r1, r2, r3
     r1.publisher = rospy.Publisher('robot1/cmd_vel', Twist, queue_size=1)
     r2.publisher = rospy.Publisher('robot2/cmd_vel', Twist, queue_size=1)
     r3.publisher = rospy.Publisher('robot3/cmd_vel', Twist, queue_size=1)
-    r1.goal = path1[r1.id]
-    r2.goal = path2[r2.id]
-    r3.goal = path3[r3.id]
-    r1.path = path1
-    r2.path = path2
-    r3.path = path3
+    r1.path.append(utils.transformCoordnateMapToOdom(7, 35, map))
+    r1.path.append(utils.transformCoordnateMapToOdom(0, 12, map))    
     r1.name = "robot1"
     r2.name = "robot2"
     r3.name = "robot3"
@@ -170,21 +156,13 @@ def odom_callback(data, robot):
                                                 data.pose.pose.orientation.z, data.pose.pose.orientation.w])
     robot.yaw = yaw
 
-def map_callback(data):
-    global map
-    # print(data.info.width, data.info.height, data.info.resolution)
-    map.width = data.info.width
-    map.height = data.info.height
-    map.originx = data.info.origin.position.x
-    map.originy = data.info.origin.position.y
-    map.resolution = 0.05
     
 if __name__ == '__main__':
     rospy.init_node('path_demo')
     rate = rospy.Rate(10)    
     while not rospy.is_shutdown():
        # Initializes a rospy node to let the SimpleActionClient publish and subscribe 
-        map_sub = rospy.Subscriber('/map', OccupancyGrid, map_callback)         
+        map_sub = rospy.Subscriber('/map', OccupancyGrid, utils.map_callback, map)   
         if setup:
             # path_demo()
             setupRobots()
