@@ -1,0 +1,4 @@
+int64 mission_id
+std_msgs/String mission_type
+geometry_msgs/PoseWithCovariance origin
+geometry_msgs/PoseWithCovariance destination
