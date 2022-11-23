@@ -3,6 +3,7 @@ import math
 import actionlib
 import numpy as np
 import utils
+import time
 
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from std_msgs.msg import String
@@ -22,11 +23,18 @@ class Robot:
         self.goal = (0.0,0.0)
         self.path = []
         self.name = "robot" + str(self.id)
+        self.actiontime = float('inf')
     #method to initialize all variables receiving them as parameters
     def init(self, index, name, publisher):
         self.id = index
         self.name = name
-        self.publisher = publisher
+        self.publisher = publisher        
+    #set the linear and angular velocity to 0, and publish using the publisher
+    def stop(self):
+        speed = Twist()
+        speed.linear.x = 0
+        speed.angular.z = 0
+        self.publisher.publish(speed)
 
 class Map:
     def __init__(self):
@@ -58,6 +66,7 @@ threshold = 0.3
 # goal3 = MoveBaseGoal()
 setup = True
 robots = []
+init_time = 0
 
 def euclidianDistance(goal, rx, ry):
     return math.sqrt(pow((goal[0] - rx), 2) + pow((goal[1] - ry), 2))
@@ -66,12 +75,12 @@ def linearVel(goal, rx, ry, limit, constant=0.4):
     return np.clip(constant * euclidianDistance(goal, rx, ry), 0, limit)
 
 def steeringAngle(goal, rx, ry):
-    print("steeringAngle: ", math.degrees(math.atan2(goal[1] - ry, goal[0] - rx))+ math.radians(90)) 
+    # print("steeringAngle: ", math.degrees(math.atan2(goal[1] - ry, goal[0] - rx))+ math.radians(90)) 
     return math.atan2(goal[1] - ry, goal[0] - rx)
 
 def angularVel(goal, rx, ry, robotYaw, limit, constant=2):
-    print("vel in degrees: ", math.degrees(constant * steeringAngle(goal, rx, ry) - robotYaw))
-    print("yaw in degrees: ", math.degrees(robotYaw))
+    # print("vel in degrees: ", math.degrees(constant * steeringAngle(goal, rx, ry) - robotYaw))
+    # print("yaw in degrees: ", math.degrees(robotYaw))
     return np.clip(constant * (steeringAngle(goal, rx, ry) - robotYaw), -limit, limit) 
 
 def setupRobots():
@@ -79,31 +88,27 @@ def setupRobots():
     r1.publisher = rospy.Publisher('robot1/cmd_vel', Twist, queue_size=1)
     r2.publisher = rospy.Publisher('robot2/cmd_vel', Twist, queue_size=1)
     r3.publisher = rospy.Publisher('robot3/cmd_vel', Twist, queue_size=1)
-    r1.path.append(utils.transformCoordnateMapToOdom(7, 35, map))
-    r1.path.append(utils.transformCoordnateMapToOdom(0, 12, map))    
+    r1.path.append(utils.getGazeboCoordinate(0, 30, (70, 46), 0.4))
+    r1.path.append(utils.getGazeboCoordinate(12, 21, (70, 46), 0.4)) 
+    r1.path.append(utils.getGazeboCoordinate(28, 20, (70, 46), 0.4)) 
+    r1.goal = r1.path[r1.id]   
     r1.name = "robot1"
     r2.name = "robot2"
     r3.name = "robot3"
     robots.append(r1)
 
-def moveRobot(robot):        
-    # print("angle difference: ", math.degrees(steeringAngle(robot.goal, robot.x, robot.y)))
-    # difference = math.degrees(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)))
-    # print("difference: ", difference)
-    # if(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)) > 0.02):
-    #     angularSpeed(robot)
-    #     #linearSpeed(robot)
-    # else:
-    #     angularSpeed(robot)                
-    #     linearSpeed(robot)
+def moveRobot(robot):          
+    if robot.actiontime > time.time():
+        robot.actiontime = time.time()
+        print("starting at time: ", robot.actiontime - robot.actiontime)
     speed = Twist()
     robot.goal = (robot.path[robot.id][0], robot.path[robot.id][1])
     speed.linear.x = linearVel(robot.goal, robot.x, robot.y, 0.3)
     speed.angular.z = angularVel(robot.goal, robot.x, robot.y, robot.yaw, 1.2)
     robot.publisher.publish(speed)
     # print(robot.name, "speed: ", speed)
-    print(robot.name, "going to: ", robot.goal)
-    print(robot.name, "at: ", robot.x, ",", robot.y)            
+    # print(robot.name, "going to: ", robot.goal)
+    # print(robot.name, "at: ", robot.x, ",", robot.y)            
     checkRobotGoalReached(robot)  
     
 def linearSpeed(robot):
@@ -144,11 +149,16 @@ def checkRobotGoalReached(robot):
     if euclidianDistance(robot.goal, robot.x, robot.y) < threshold:
         if robot.id < len(robot.path) - 1:
             rospy.loginfo(robot.name + " reached point " + str(robot.id))
-            robot.id += 1            
+            print("at time: ", abs(time.time() - robot.actiontime))
+            robot.actiontime = time.time()
         else:            
             robot.publisher.publish(speed)
+            rospy.loginfo(robot.name + " reached point " + str(robot.id))
+            print("at time: ", abs(time.time() - robot.actiontime))
             rospy.loginfo(robot.name + " reached goal") 
-            
+            print("at time: ", abs(init_time - robot.actiontime))
+        robot.id += 1           
+                    
 def odom_callback(data, robot):
     robot.x = data.pose.pose.position.x
     robot.y = data.pose.pose.position.y
@@ -160,19 +170,22 @@ def odom_callback(data, robot):
 if __name__ == '__main__':
     rospy.init_node('path_demo')
     rate = rospy.Rate(10)    
+    init_time = time.time()
     while not rospy.is_shutdown():
        # Initializes a rospy node to let the SimpleActionClient publish and subscribe 
         map_sub = rospy.Subscriber('/map', OccupancyGrid, utils.map_callback, map)   
-        if setup:
-            # path_demo()
+        if setup and (map.resolution != 0 and map.originx != 0 and map.originy != 0 ):
+            # path_demo() 
             setupRobots()
             setup = False
-        if(map.resolution != 0):
+        if(map.resolution != 0 and map.originx != 0 and map.originy != 0 ):
             #iterate through all robots in robots vector, if they are not at their goal, move them
             for robot in robots:
                 rospy.Subscriber(robot.name+'/ground_truth/state', Odometry, odom_callback, robot)
-                if(robot.id < len(robot.path) -1):
+                if(robot.id < len(robot.path)):
                     moveRobot(robot)
+                    # print(len(robot.path))
+                    # print(robot.id)
                 else:
                     robot.stop()  
         rate.sleep()

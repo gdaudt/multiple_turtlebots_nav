@@ -35,6 +35,7 @@ if __name__ == '__main__':
     posvec = [(-999, -999), (-999, -999), (-999, -999)]  
     while not rospy.is_shutdown():
         map_sub = rospy.Subscriber('/map', OccupancyGrid, utils.map_callback, map) 
+        print(utils.getGazeboCoordinate(7, 35, (70, 46), mapResolution))
         #print the map info
         # print("MAP GLOBAL VARIABLE", map.width, map.height, map.resolution)
         #loops through all the robots, creating a subscriber to each of the robots/odom topic
@@ -57,9 +58,9 @@ if __name__ == '__main__':
                     posvec[robot.id] = utils.truncateCoordinate(robot.x, robot.y, mapResolution)
                     print(robot.name + " truncated coordinates: ", (posvec[robot.id][0], posvec[robot.id][1]))
                     #resolution is 0.4m
-                    abstractCoordinate = utils.getMapCoordinate(posvec[robot.id][0], posvec[robot.id][1], (70, 46), mapResolution)
+                    abstractCoordinate = utils.getMapCoordinate(posvec[robot.id][0], posvec[robot.id][1], (46, 70), mapResolution)
                     print(robot.name + " abstract coordinates: ", abstractCoordinate)
-                    print(robot.name + " gazebo coordinates: ", utils.getGazeboCoordinate(abstractCoordinate[0], abstractCoordinate[1], (70, 46), mapResolution))
+                    print(robot.name + " gazebo coordinates: ", utils.getGazeboCoordinate(abstractCoordinate[1], abstractCoordinate[0], (46, 70), mapResolution))
         rate.sleep()
         now = rospy.get_rostime()
         # rospy.loginfo("Current time %i %i", now.secs, now.nsecs)

@@ -34,11 +34,11 @@ def getMapCoordinate(x, y, dimensions, resolution):
     y = (y / resolution) + (dimensions[0] / 2)
     return (x, y)
 
-def getGazeboCoordinate(x, y, dimensions, resolution):
+def getGazeboCoordinate(mapx, mapy, dimensions, resolution):
     #invert the calculation of getMapCoordinate
-    x = (x - (dimensions[1] / 2)) * resolution
-    y = (y - (dimensions[0] / 2)) * resolution
-    return (x, y)
+    x = (mapx - (dimensions[0] / 2)) * resolution
+    y = (mapy - (dimensions[1] / 2)) * resolution
+    return (round(x, 1), round(y, 1))
     
 class Map:
     def __init__(self):
