@@ -26,11 +26,11 @@
     </include>
   </group>
 <!-- BEGIN robot2-->
-  <!-- <arg name="robot2_prefix" value="robot2"/> 
+  <arg name="robot2_prefix" value="robot2"/> 
   <group ns="$(arg robot2_prefix)">
     <param name="tf_prefix" value="$(arg robot2_prefix)" />
     <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 0 -y -1 -z 0" />
+      <arg name="init_pose" value="-x -8.8 -y 8 -z 0" />
       <arg name="robot_name"  value="robot2" />
       <arg name="model" value="$(arg model)"/>
       <arg name="set_base_frame" value="$(arg robot2_prefix)/base_footprint"/>
@@ -41,7 +41,7 @@
       <arg name="initial_pose_y" default="0"/>
       <arg name="initial_pose_a" default="0"/>   
     </include>
-  </group> -->
+  </group>
 <!-- BEGIN robot3-->
   <!-- <arg name="robot3_prefix" value="robot3"/> 
   <group ns="$(arg robot3_prefix)">

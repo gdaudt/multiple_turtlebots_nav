@@ -11,6 +11,7 @@ from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Point, Twist
 from nav_msgs.msg import OccupancyGrid
+from sensor_msgs.msg import LaserScan
 
 
 class Robot:
@@ -24,6 +25,7 @@ class Robot:
         self.path = []
         self.name = "robot" + str(self.id)
         self.actiontime = float('inf')
+        self.total_time = 0
     #method to initialize all variables receiving them as parameters
     def init(self, index, name, publisher):
         self.id = index
@@ -92,10 +94,17 @@ def setupRobots():
     r1.path.append(utils.getGazeboCoordinate(12, 21, (70, 46), 0.4)) 
     r1.path.append(utils.getGazeboCoordinate(28, 20, (70, 46), 0.4)) 
     r1.goal = r1.path[r1.id]   
+    #append points to r2 path in gazebo coordinates
+    #points are (13, 43), (57,40), (68,36)
+    r2.path.append(utils.getGazeboCoordinate(13, 43, (70, 46), 0.4))
+    r2.path.append(utils.getGazeboCoordinate(57, 40, (70, 46), 0.4))
+    r2.path.append(utils.getGazeboCoordinate(68, 36, (70, 46), 0.4))
+    r2.goal = r2.path[r2.id] 
     r1.name = "robot1"
     r2.name = "robot2"
     r3.name = "robot3"
     robots.append(r1)
+    robots.append(r2)
 
 def moveRobot(robot):          
     if robot.actiontime > time.time():
@@ -150,13 +159,15 @@ def checkRobotGoalReached(robot):
         if robot.id < len(robot.path) - 1:
             rospy.loginfo(robot.name + " reached point " + str(robot.id))
             print("at time: ", abs(time.time() - robot.actiontime))
+            robot.total_time += abs(time.time() - robot.actiontime)
             robot.actiontime = time.time()
         else:            
             robot.publisher.publish(speed)
             rospy.loginfo(robot.name + " reached point " + str(robot.id))
             print("at time: ", abs(time.time() - robot.actiontime))
+            robot.total_time += abs(time.time() - robot.actiontime)
             rospy.loginfo(robot.name + " reached goal") 
-            print("at time: ", abs(init_time - robot.actiontime))
+            print("at time: ", robot.total_time)
         robot.id += 1           
                     
 def odom_callback(data, robot):
@@ -165,6 +176,19 @@ def odom_callback(data, robot):
     (roll, pitch, yaw) = euler_from_quaternion([data.pose.pose.orientation.x, data.pose.pose.orientation.y, 
                                                 data.pose.pose.orientation.z, data.pose.pose.orientation.w])
     robot.yaw = yaw
+
+def laser_callback(data, robot):    
+    # if data.ranges[0::15] < 0.2:
+    #     print("obstacle detected")
+    #     speed = Twist()
+    #     speed.angular.z = 0.5
+    #     robot.publisher.publish(speed)
+    # elif data.ranges[344:359] < 0.2:
+    #     print("obstacle detected")
+    #     speed = Twist()
+    #     speed.angular.z = -0.5
+    #     robot.publisher.publish(speed)
+    
 
     
 if __name__ == '__main__':
@@ -182,6 +206,7 @@ if __name__ == '__main__':
             #iterate through all robots in robots vector, if they are not at their goal, move them
             for robot in robots:
                 rospy.Subscriber(robot.name+'/ground_truth/state', Odometry, odom_callback, robot)
+                rospy.Subscriber(robot.name+'/scan', LaserScan, laser_callback, robot)
                 if(robot.id < len(robot.path)):
                     moveRobot(robot)
                     # print(len(robot.path))
