@@ -13,7 +13,7 @@
   <group ns="$(arg robot1_prefix)">
     <param name="tf_prefix" value="$(arg robot1_prefix)" />
     <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 0.6363961030678926 -y 0.21213203435596423 -z 0 -Y 3.141592653589793" />
+      <arg name="init_pose" value="-x 0.6363961030678926 -y 0.21213203435596423 -z 0 -Y 0.0" />
       <arg name="robot_name"  value="robot1" />
       <arg name="model" value="$(arg model)"/>
       <arg name="set_base_frame" value="$(arg robot1_prefix)/base_footprint"/>
@@ -30,202 +30,15 @@
   <group ns="$(arg robot2_prefix)">
     <param name="tf_prefix" value="$(arg robot2_prefix)" />
     <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 1.909188309203678 -y 4.03050865276332 -z 0 -Y -1.8157749899217608" />
+      <arg name="init_pose" value="-x 1.4849242404917495 -y 0.21213203435596423 -z 0 -Y 3.141592653589793" />
       <arg name="robot_name"  value="robot2" />
       <arg name="model" value="$(arg model)"/>
       <arg name="set_base_frame" value="$(arg robot2_prefix)/base_footprint"/>
       <arg name="set_odom_frame" value="$(arg robot2_prefix)/odom"/>
       <arg name="set_scan_frame" value="$(arg robot2_prefix)/base_scan"/>
       <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="1.909188309203678"/>
-      <arg name="initial_pose_y" default="4.03050865276332"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot3-->
-  <arg name="robot3_prefix" value="robot3"/> 
-  <group ns="$(arg robot3_prefix)">
-    <param name="tf_prefix" value="$(arg robot3_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 0.6363961030678926 -y 2.757716446627535 -z 0 -Y -0.24497866312686414" />
-      <arg name="robot_name"  value="robot3" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot3_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot3_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot3_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="0.6363961030678926"/>
-      <arg name="initial_pose_y" default="2.757716446627535"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot4-->
-  <arg name="robot4_prefix" value="robot4"/> 
-  <group ns="$(arg robot4_prefix)">
-    <param name="tf_prefix" value="$(arg robot4_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 2.3334523779156067 -y 0.21213203435596423 -z 0 -Y 0.0" />
-      <arg name="robot_name"  value="robot4" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot4_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot4_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot4_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="2.3334523779156067"/>
+      <arg name="initial_pose_x" default="1.4849242404917495"/>
       <arg name="initial_pose_y" default="0.21213203435596423"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot5-->
-  <arg name="robot5_prefix" value="robot5"/> 
-  <group ns="$(arg robot5_prefix)">
-    <param name="tf_prefix" value="$(arg robot5_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 1.0606601717798212 -y 4.03050865276332 -z 0 -Y -0.9505468408120752" />
-      <arg name="robot_name"  value="robot5" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot5_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot5_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot5_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="1.0606601717798212"/>
-      <arg name="initial_pose_y" default="4.03050865276332"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot6-->
-  <arg name="robot6_prefix" value="robot6"/> 
-  <group ns="$(arg robot6_prefix)">
-    <param name="tf_prefix" value="$(arg robot6_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 3.606244584051392 -y 1.0606601717798212 -z 0 -Y 2.214297435588181" />
-      <arg name="robot_name"  value="robot6" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot6_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot6_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot6_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="3.606244584051392"/>
-      <arg name="initial_pose_y" default="1.0606601717798212"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot7-->
-  <arg name="robot7_prefix" value="robot7"/> 
-  <group ns="$(arg robot7_prefix)">
-    <param name="tf_prefix" value="$(arg robot7_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 1.0606601717798212 -y 1.4849242404917495 -z 0 -Y 2.356194490192345" />
-      <arg name="robot_name"  value="robot7" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot7_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot7_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot7_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="1.0606601717798212"/>
-      <arg name="initial_pose_y" default="1.4849242404917495"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot8-->
-  <arg name="robot8_prefix" value="robot8"/> 
-  <group ns="$(arg robot8_prefix)">
-    <param name="tf_prefix" value="$(arg robot8_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 1.0606601717798212 -y 3.606244584051392 -z 0 -Y 0.0" />
-      <arg name="robot_name"  value="robot8" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot8_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot8_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot8_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="1.0606601717798212"/>
-      <arg name="initial_pose_y" default="3.606244584051392"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot9-->
-  <arg name="robot9_prefix" value="robot9"/> 
-  <group ns="$(arg robot9_prefix)">
-    <param name="tf_prefix" value="$(arg robot9_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 0.21213203435596423 -y 1.0606601717798212 -z 0 -Y 0.8621700546672264" />
-      <arg name="robot_name"  value="robot9" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot9_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot9_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot9_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="0.21213203435596423"/>
-      <arg name="initial_pose_y" default="1.0606601717798212"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot10-->
-  <arg name="robot10_prefix" value="robot10"/> 
-  <group ns="$(arg robot10_prefix)">
-    <param name="tf_prefix" value="$(arg robot10_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 1.909188309203678 -y 3.1819805153394634 -z 0 -Y 0.0" />
-      <arg name="robot_name"  value="robot10" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot10_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot10_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot10_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="1.909188309203678"/>
-      <arg name="initial_pose_y" default="3.1819805153394634"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot11-->
-  <arg name="robot11_prefix" value="robot11"/> 
-  <group ns="$(arg robot11_prefix)">
-    <param name="tf_prefix" value="$(arg robot11_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 0.6363961030678926 -y 1.0606601717798212 -z 0 -Y -1.1071487177940904" />
-      <arg name="robot_name"  value="robot11" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot11_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot11_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot11_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="0.6363961030678926"/>
-      <arg name="initial_pose_y" default="1.0606601717798212"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot12-->
-  <arg name="robot12_prefix" value="robot12"/> 
-  <group ns="$(arg robot12_prefix)">
-    <param name="tf_prefix" value="$(arg robot12_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 4.03050865276332 -y 3.1819805153394634 -z 0 -Y -2.7367008673047097" />
-      <arg name="robot_name"  value="robot12" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot12_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot12_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot12_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="4.03050865276332"/>
-      <arg name="initial_pose_y" default="3.1819805153394634"/>
-      <arg name="initial_pose_a" default="0"/>   
-    </include>
-  </group>
-<!-- BEGIN robot13-->
-  <arg name="robot13_prefix" value="robot13"/> 
-  <group ns="$(arg robot13_prefix)">
-    <param name="tf_prefix" value="$(arg robot13_prefix)" />
-    <include file="$(find multiple_turtlebots_nav)/launch/one_robot.launch" >
-      <arg name="init_pose" value="-x 2.3334523779156067 -y 1.909188309203678 -z 0 -Y 1.1902899496825317" />
-      <arg name="robot_name"  value="robot13" />
-      <arg name="model" value="$(arg model)"/>
-      <arg name="set_base_frame" value="$(arg robot13_prefix)/base_footprint"/>
-      <arg name="set_odom_frame" value="$(arg robot13_prefix)/odom"/>
-      <arg name="set_scan_frame" value="$(arg robot13_prefix)/base_scan"/>
-      <arg name="set_map_frame" value="$(arg set_map_frame)"/>
-      <arg name="initial_pose_x" default="2.3334523779156067"/>
-      <arg name="initial_pose_y" default="1.909188309203678"/>
       <arg name="initial_pose_a" default="0"/>   
     </include>
   </group>
