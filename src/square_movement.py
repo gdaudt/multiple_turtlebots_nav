@@ -2,6 +2,7 @@ import rospy
 import math
 import actionlib
 import numpy as np
+import time
 from enum import Enum
 
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
@@ -11,11 +12,6 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Point, Twist
 from nav_msgs.msg import OccupancyGrid
 
-class Movement(Enum):
-    UP = 0
-    DOWN = 1
-    LEFT = 2
-    RIGHT = 3
 
 class Robot:
     def __init__(self):
@@ -27,6 +23,10 @@ class Robot:
         self.goal = (0.0,0.0)
         self.path = 0
         self.name = "robot"
+        self.timer = 0
+        self.moving = False
+        self.rotation_init = True
+        self.rotation_angle = 0
 
 class Map:
     def __init__(self):
@@ -35,21 +35,28 @@ class Map:
         self.originx = 0
         self.originy = 0
         self.resolution = 0
+
+class Movement(Enum):
+    kUp = 0
+    kRight = 1
+    kLeft = 2
+    kDown = 3  
+
 r1 = Robot()
 r2 = Robot()
 r3 = Robot()
 map = Map()
-path1 = [Movement.UP, Movement.UP, Movement.UP, Movement.LEFT, Movement.UP, Movement.UP, Movement.UP]
-path2 = [Movement.UP, Movement.UP, Movement.UP, Movement.UP, Movement.UP, Movement.UP, Movement.UP, Movement.RIGHT, Movement.UP, Movement.UP]
-path3 = [Movement.UP, Movement.UP, Movement.UP, Movement.RIGHT, Movement.UP, Movement.UP, Movement.UP, Movement.LEFT, Movement.UP, Movement.UP, Movement.RIGHT, Movement.UP]
+path1 = [Movement.kUp, Movement.kRight, Movement.kUp, Movement.kLeft, Movement.kUp, Movement.kRight, Movement.kUp]
+path2 = [Movement.kUp, Movement.kRight, Movement.kUp, Movement.kLeft, Movement.kUp, Movement.kRight, Movement.kUp]
+path3 = [Movement.kUp, Movement.kRight, Movement.kUp, Movement.kLeft, Movement.kUp, Movement.kRight, Movement.kUp]
 threshold = 0.3
-kP = 0.5
 setup = True
+flag = False
 
 def euclidianDistance(goal, rx, ry):
     return math.sqrt(pow((goal[0] - rx), 2) + pow((goal[1] - ry), 2))
 
-def linearVel(goal, rx, ry, constant=1):
+def linearVel(goal, rx, ry, constant=0.4):
     return constant * euclidianDistance(goal, rx, ry)
 
 def steeringAngle(goal, rx, ry):
@@ -92,64 +99,61 @@ def moveRobot(robot):
     # print("angle difference: ", math.degrees(steeringAngle(robot.goal, robot.x, robot.y)))
     # difference = math.degrees(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)))
     # print("difference: ", difference)
-    if(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)) > 0.02):
-        angularSpeed(robot)
-        #linearSpeed(robot)
-    else:
-        angularSpeed(robot)                
-        linearSpeed(robot)
-    
-    print(robot.name, "going to: ", robot.goal)
-    print(robot.name, "at: ", robot.x, ",", robot.y)            
-    checkRobotGoalReached(robot)    
-    
-# def testAngular(robot):
-#     speed = Twist()
-#     speed.angular.z = 0.1
-#     robot.publisher.publish(speed)
-    
-def linearSpeed(robot):
-    speed = Twist()
-    robot.goal = (robot.path[robot.index][0], robot.path[robot.index][1])
-    goal = robot.goal
-    if(euclidianDistance(goal, robot.x, robot.y) > threshold):
-        vel = linearVel(goal, robot.x, robot.y)
-        speed.linear.x = vel
-        speed.linear.y = 0
-        if(vel > 0.3):
-            vel = 0.3
-        # print("going forward at speed: ", vel)
-    else:
-        speed.linear.x = 0
-    robot.publisher.publish(speed)
- 
-def rotate_robot(robot, angle):
-    target_rad = math.radians(angle)
-    ang_speed = kP * (target_rad - robot.yaw)
-    return ang_speed
+    if(robot.path[robot.index] == Movement.kUp):
+        if(robot.moving == False):
+            robot.moving = True
+            robot.timer = time.time() + 2.5
+        if(moveForward(robot)):
+            speed = Twist()
+            speed.linear.x = 0
+            robot.publisher.publish(speed)
+            if robot.index < len(robot.path) - 1:
+                rospy.loginfo(robot.name + " reached point " + str(robot.index))
+                robot.index += 1
+                robot.moving = False    
+    elif(robot.path[robot.index] == Movement.kRight):
+        if(rotate(robot, math.radians(90))):
+            speed = Twist()
+            speed.angular.z = 0
+            robot.publisher.publish(speed)
+            if robot.index < len(robot.path) - 1:
+                rospy.loginfo(robot.name + " reached point " + str(robot.index))
+                robot.index += 1     
+                robot.rotation_init = True       
+    elif(robot.path[robot.index] == Movement.kLeft):
+        if(rotate(robot, math.radians(-90))):
+            speed = Twist()
+            speed.angular.z = 0
+            robot.publisher.publish(speed)
+            if robot.index < len(robot.path) - 1:
+                rospy.loginfo(robot.name + " reached point " + str(robot.index))
+                robot.index += 1              
+                robot.rotation_init = True  
 
-# move up on 0.4 ms for 1 second
-def move_up(robot):
-    speed = Twist() 
-    speed.linear.x = 0.4
-    robot.publisher.publish(speed)
-    rospy.sleep(1)
-    speed.linear.x = 0.0
-    robot.publisher.publish(speed) 
-    
-   
-def angularSpeed(robot):
+def moveForward(robot):
     speed = Twist()
-    robot.goal = (robot.path[robot.index][0], robot.path[robot.index][1])
-    goal = robot.goal
-    ang = angularVel(goal, robot.x, robot.y, robot.yaw)
-    if(ang > 1):
-        ang = 1
-    elif(ang < -1):
-        ang = -1 
-    speed.angular.z = ang 
-    # print("rotating at speed: ", ang)
-    robot.publisher.publish(speed)           
+    speed.linear.x = 0.2
+    speed.linear.y = 0
+    robot.publisher.publish(speed)
+    if(robot.timer < time.time()):
+        robot.moving = False
+        return True
+    else:
+        return False
+
+    
+def rotate(robot, angle):
+    kP = 0.8
+    if(robot.rotation_init):
+        robot.rotation_angle = robot.yaw + angle
+        robot.rotation_init = False
+    speed = Twist()
+    speed.angular.z = kP * (robot.rotation_angle - robot.yaw)
+    robot.publisher.publish(speed)
+    if(robot.rotation_angle - robot.yaw < 0.03 and robot.rotation_angle - robot.yaw > -0.03):
+        return True
+    else:
+        return False
     
 # compares every robots current pose to the goal pose
 # if the distance between the robot and the goal is less than a threshold, the robot is considered reached
@@ -165,22 +169,6 @@ def checkRobotGoalReached(robot):
         else:            
             robot.publisher.publish(speed)
             rospy.loginfo(robot.name + " reached goal")  
-        
-
-def setGoal(goal, x, y):    
-    goal.target_pose.header.frame_id = "map"
-    goal.target_pose.header.stamp = rospy.Time.now()
-    goal.target_pose.pose.position.x = x
-    goal.target_pose.pose.position.y = y    
-    goal.target_pose.pose.orientation.w = 1.0
-    
-def setGoal(goal, x, y, robot):    
-    goal.target_pose.header.frame_id = "map"
-    goal.target_pose.header.stamp = rospy.Time.now()
-    goal.target_pose.pose.position.x = x
-    goal.target_pose.pose.position.y = y    
-    goal.target_pose.pose.orientation.w = 1.0
-    robot.goal = (x, y)
         
 def cbpose1(data):
     global r1

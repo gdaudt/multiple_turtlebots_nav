@@ -8,8 +8,8 @@
   </gazebo>
 
   <gazebo reference="wheel_left_link">
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
+    <mu1>0.1</mu1>
+    <mu2>0.1</mu2>
     <kp>500000.0</kp>
     <kd>10.0</kd>
     <minDepth>0.001</minDepth>
@@ -19,8 +19,8 @@
   </gazebo>
 
   <gazebo reference="wheel_right_link">
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
+    <mu1>0.1</mu1>
+    <mu2>0.1</mu2>
     <kp>500000.0</kp>
     <kd>10.0</kd>
     <minDepth>0.001</minDepth>
@@ -131,15 +131,15 @@
       </plugin>
     </sensor>
   </gazebo>
-  
+
   <gazebo>
   <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
     <alwaysOn>true</alwaysOn>
     <updateRate>50.0</updateRate>
-    <bodyName>base_link</bodyName>
+    <bodyName>base_footprint</bodyName>
     <topicName>ground_truth/state</topicName>
-    <gaussianNoise>0.00</gaussianNoise>
-    <frameName>map</frameName>
+    <gaussianNoise>0.01</gaussianNoise>
+    <frameName>/map</frameName>
     <xyzOffsets>0 0 0</xyzOffsets>
     <rpyOffsets>0 0 0</rpyOffsets>
   </plugin>

@@ -2,28 +2,46 @@ import rospy
 import math
 import actionlib
 import numpy as np
+import utils
+import time
 
+from xml_read import TaskReader
+from xml_read import Task
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Point, Twist
 from nav_msgs.msg import OccupancyGrid
+from gazebo_msgs.msg import PerformanceMetrics
 
 
-class Robot:
-    def __init__(self):
+
+class Robot:    
+    #method to initialize all variables receiving them as parameters
+    def __init__(self, index, publisher, path, name):
+        self.id = index
+        self.name = name
+        self.publisher = publisher
+        self.actiontime = float('inf')        
+        self.path = path
+        self.goalid = 2
+        self.pathid = 0
+        self.goal_duration = 0
         self.x = 0.0
         self.y = 0.0
         self.yaw = 0
-        self.publisher = 0
-        self.index = 0
-        self.goal = (0.0,0.0)
-        self.path = 0
-        self.name = "robot"
-    
+        self.completed = False
+        self.goal_reached = False
+        self.newgoal = True
+        self.speed = Twist()
+        self.radius = 0.20
+    #set the linear and angular velocity to 0, and publish using the publisher
     def stop(self):
-        self.publisher.publish(Twist())
+        speed = Twist()
+        speed.linear.x = 0
+        speed.angular.z = 0
+        self.publisher.publish(speed)
 
 class Map:
     def __init__(self):
@@ -32,181 +50,177 @@ class Map:
         self.originx = 0
         self.originy = 0
         self.resolution = 0
-
-# robot1Pose = 0
-# robot2Pose = 0
-# robot3Pose = 0
-# r1yaw, r2yaw, r3yaw = 0, 0, 0
-# r1index, r2index, r3index = 0, 0, 0 
-r1 = Robot()
-r2 = Robot()
-r3 = Robot()
-robots = [r1, r2, r3]
+robot_radius = 0.15
 map = Map()
-path1 = np.array([[2.000000,-1.600000],[2.000000,-2.000000],[2.000000,-2.400000],[2.000000,-2.800000],[2.000000,-3.200000],[2.000000,-3.600000],[2.000000,-4.000000],[2.000000,-4.400000],[1.600000,-4.400000],[1.200000,-4.400000],[1.200000,-4.800000],[0.800000,-4.800000],[0.400000,-4.800000],[0.000000,-4.800000],[-0.400000,-4.800000],[-0.800000,-4.800000],[-1.200000,-4.800000],[-1.600000,-4.800000],[-2.000000,-4.800000],[-2.400000,-4.800000],[-2.800000,-4.800000],[-3.200000,-4.800000],[-3.600000,-4.800000],[-3.600000,-4.400000],[-4.000000,-4.400000],[-4.400000,-4.400000]])
-path2 = np.array([[2.000000,-0.400000],[2.000000,-0.800000],[2.400000,-0.800000],[2.800000,-0.800000],[3.200000,-0.800000], [2.000000,-0.400000],[2.000000,-0.800000],[2.400000,-0.800000],[2.800000,-0.800000],[3.200000,-0.800000]])
-path3 = np.array([[2.000000,0.800000],[2.000000,0.400000],[2.000000,0.000000],[2.000000,-0.400000],[2.000000,-0.800000],[2.000000,-1.200000],[2.000000,-1.600000],[1.600000,-1.600000],[1.200000,-1.600000],[1.200000,-2.000000],[0.800000,-2.000000],[0.400000,-2.000000],[0.000000,-2.000000],[-0.400000,-2.000000],[-0.800000,-2.000000],[-1.200000,-2.000000],[-1.600000,-2.000000],[-2.000000,-2.000000],[-2.400000,-2.000000],[-2.800000,-2.000000],[-3.200000,-2.000000],[-3.600000,-2.000000],[-3.600000,-1.600000],[-4.000000,-1.600000],[-4.400000,-1.600000]])
-# copy all paths and replace all negative values with positive ones
-threshold = 0.2
+gazebo_time = 0
+threshold = 0.05
 setup = True
+robots = []
+init_time = 0
+map_resolution = 0.5
+lin_limit = 0.2
 
+def gazebo_time_callback(data, time):
+    global gazebo_time
+    time = data.header.stamp.secs + (data.header.stamp.nsecs * 1e-9)
+    gazebo_time = time
 
 def euclidianDistance(goal, rx, ry):
     return math.sqrt(pow((goal[0] - rx), 2) + pow((goal[1] - ry), 2))
 
-def linearVel(goal, rx, ry, limit, constant=0.4):
+def linearVel(goal, rx, ry, limit, constant=1.2):
     return np.clip(constant * euclidianDistance(goal, rx, ry), 0, limit)
 
 def steeringAngle(goal, rx, ry):
-    print("steeringAngle: ", math.degrees(math.atan2(goal[1] - ry, goal[0] - rx))+ math.radians(90)) 
+    # print("steeringAngle: ", math.degrees(math.atan2(goal[1] - ry, goal[0] - rx))+ math.radians(90)) 
     return math.atan2(goal[1] - ry, goal[0] - rx)
 
-def angularVel(goal, rx, ry, robotYaw, limit, constant=2):
-    print("vel in degrees: ", math.degrees(constant * steeringAngle(goal, rx, ry) - robotYaw))
-    print("yaw in degrees: ", math.degrees(robotYaw))
-    return np.clip(constant * (steeringAngle(goal, rx, ry) - robotYaw), -limit, limit)
+def angularVel(goal, rx, ry, robotYaw, limit, constant=1):
+    #divide the goal(x, y) and the rx, ry difference between the four quadrants of the radians
+    #adjust the resulting radians to the robot's yaw
+    vel = steeringAngle(goal, rx, ry) - robotYaw
+    # print("vel before adjustment: ", vel)
+    if (vel > math.pi):
+        vel -= 2 * math.pi
+    elif (vel < -math.pi):
+        vel += 2 * math.pi
+    # print("vel after adjustment: ", vel)
+    # print("angular vel: ", vel)
+    # print("goal: ", goal)
+    # print("rx, ry: ", rx, ry)
+    # print("robotYaw: ", robotYaw)
+    return np.clip(constant*vel, -limit, limit)
 
-def transformCoordinateOdomToMap(x, y): 
-    j = y / map.resolution - map.originy / map.resolution
-    i = x / map.resolution - map.originx / map.resolution
-    return (i, j);  
-  
-def transformCoordinateMapToOdom(x, y):
-    global map
-    print(map.resolution, map.originx, map.originy)
-    i = (x + map.originx / map.resolution) * map.resolution
-    j = (y + map.originy / map.resolution) * map.resolution
-    return (i, j)  
+def setupRobots(tasks, r_amount):
+    global gazebo_time
+    global robot_radius 
+    i = 1 
+    for task in tasks: 
+        # if(i != 4):
+        #     i+=1
+        #     continue           
+        id = i
+        name = "robot" + str(i)
+        publisher = rospy.Publisher(name + '/cmd_vel', Twist, queue_size=1)        
+        print("adding robot ", i)
+        print("robot name: ", name)
+        print("path duration: ",task.duration)
+        print("gazebo time: ", gazebo_time)
+        path = []
+        for p in task.path:
+            # r.path.append(utils.getGazeboCoordinate(p[0], p[1], (70, 46), map_resolution))
+            start = utils.planToGazeboCoordinate(p[0], p[1], robot_radius)
+            goal = utils.planToGazeboCoordinate(p[2], p[3], robot_radius)            
+            print("start: ", p[0], p[1])
+            print("goal: ", p[2], p[3])
+            print("duration: ", p[4])
+            if(float(p[4]) < 1.5):
+                p = (start[0], start[1], goal[0], goal[1], float(p[4])*4)
+            else:
+                p = (start[0], start[1], goal[0], goal[1], float(p[4])*1)
+            print(p)
+            path.append(p)
+        robots.append(Robot(id, publisher, path, name))    
+        i+=1  
+        
 
-def setupRobots():
-    global r1, r2, r3
-    r1.publisher = rospy.Publisher('robot1/cmd_vel', Twist, queue_size=1)
-    r2.publisher = rospy.Publisher('robot2/cmd_vel', Twist, queue_size=1)
-    r3.publisher = rospy.Publisher('robot3/cmd_vel', Twist, queue_size=1)
-    r1.goal = path1[r1.index]
-    r2.goal = path2[r2.index]
-    r3.goal = path3[r3.index]
-    r1.path = path1
-    r2.path = path2
-    r3.path = path3
-    r1.name = "robot1"
-    r2.name = "robot2"
-    r3.name = "robot3"
 
-def moveRobot(robot):        
-    # print("angle difference: ", math.degrees(steeringAngle(robot.goal, robot.x, robot.y)))
-    # difference = math.degrees(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)))
-    # print("difference: ", difference)
-    # if(abs(robot.yaw - steeringAngle(robot.goal, robot.x, robot.y)) > 0.02):
-    #     angularSpeed(robot)
-    #     #linearSpeed(robot)
-    # else:
-    #     angularSpeed(robot)                
-    #     linearSpeed(robot)
-    speed = Twist()
-    robot.goal = (robot.path[robot.index][0], robot.path[robot.index][1])
-    speed.linear.x = linearVel(robot.goal, robot.x, robot.y, 0.3)
-    speed.angular.z = angularVel(robot.goal, robot.x, robot.y, robot.yaw, 1.2)
-    robot.publisher.publish(speed)
-    # print(robot.name, "speed: ", speed)
-    print(robot.name, "going to: ", robot.goal)
-    print(robot.name, "at: ", robot.x, ",", robot.y)            
+def moveRobot(robot):       
+    global gazebo_time   
+    
+    if robot.actiontime > gazebo_time:
+        robot.actiontime = gazebo_time
+        print("starting at time: ", robot.actiontime - robot.actiontime)  
+    if robot.newgoal:  
+        robot.goal = (robot.path[robot.pathid][robot.goalid], robot.path[robot.pathid][robot.goalid+1])
+        robot.goal_duration = robot.path[robot.pathid][4]
+        robot.newgoal = False
+    if(not robot.goal_reached):    
+        robot.speed.angular.z = angularVel(robot.goal, robot.x, robot.y, robot.yaw, 2.5)
+        print("angular speed: ", robot.speed.angular.z)
+        #maybe limit the linear speed so it can't be bigger than 10% of the angular speed
+        if(robot.speed.angular.z < (lin_limit*-2.3) or robot.speed.angular.z > (lin_limit*2.3)):
+            print("limiting linear speed")
+            robot.speed.linear.x = 0
+        else:
+            robot.speed.linear.x = linearVel(robot.goal, robot.x, robot.y, lin_limit)
+        # if (robot.speed.angular.z < 0.1 and robot.speed.angular.z > -0.1):
+        #     if(robot.speed.linear.x < 0.2):
+        #         robot.speed.linear.x += 0.03
+        #     robot.speed.angular.z = 0
+        # else:
+        #     robot.speed.linear.x = 0
+        # robot.speed.linear.x = 0.2
+        robot.publisher.publish(robot.speed)
+        # print(robot.name, "speed: ", speed)
+        # print(robot.name, "going to: ", robot.goal)
+        # print(robot.name, "at: ", robot.x, ",", robot.y)            
     checkRobotGoalReached(robot)  
-    
-def linearSpeed(robot):
-    speed = Twist()
-    robot.goal = (robot.path[robot.index][0], robot.path[robot.index][1])
-    goal = robot.goal
-    if(euclidianDistance(goal, robot.x, robot.y) > threshold):
-        vel = linearVel(goal, robot.x, robot.y)
-        speed.linear.x = vel
-        speed.linear.y = 0
-        if(vel > 0.3):
-            vel = 0.3
-        # print("going forward at speed: ", vel)
-    else:
-        speed.linear.x = 0
-    robot.publisher.publish(speed)
-    
-def angularSpeed(robot):
-    speed = Twist()
-    robot.goal = (robot.path[robot.index][0], robot.path[robot.index][1])
-    goal = robot.goal
-    ang = angularVel(goal, robot.x, robot.y, robot.yaw)
-    if(ang > 1):
-        ang = 1
-    elif(ang < -1):
-        ang = -1 
-    speed.angular.z = ang 
-    # print("rotating at speed: ", ang)
-    robot.publisher.publish(speed)           
     
 # compares every robots current pose to the goal pose
 # if the distance between the robot and the goal is less than a threshold, the robot is considered reached
 # then it iterates the global index of the robot
-def checkRobotGoalReached(robot):    
-    speed = Twist()
-    speed.linear.x = 0
-    speed.angular.z = 0
+def checkRobotGoalReached(robot):  
+    global gazebo_time   
     if euclidianDistance(robot.goal, robot.x, robot.y) < threshold:
-        if robot.index < len(robot.path) - 1:
-            rospy.loginfo(robot.name + " reached point " + str(robot.index))
-            robot.index += 1            
+        robot.goal_reached = True
+        if(abs(gazebo_time - robot.actiontime) > robot.goal_duration):
+            if robot.pathid+1 < len(robot.path):
+                rospy.loginfo(robot.name + " reached point " + str(robot.pathid) + " (" + str(robot.goal[0]) + ", " + str(robot.goal[1]) + ")")
+                print("at time: ", abs(gazebo_time - robot.actiontime), " expected duration: ", robot.goal_duration)
+                robot.actiontime = gazebo_time
+                robot.pathid += 1
+                robot.newgoal = True
+                robot.goal_reached = False
+            else:            
+                robot.stop()
+                rospy.loginfo(robot.name + " reached point " + str(robot.pathid))
+                print("at time: ", abs(gazebo_time - robot.actiontime))
+                rospy.loginfo(robot.name + " reached goal") 
+                print("at time: ", abs(init_time - robot.actiontime))  
+                robot.pathid += 1
         else:            
-            robot.publisher.publish(speed)
-            rospy.loginfo(robot.name + " reached goal") 
-            
-def cbpose1(data):
-    global r1
-    r1.x = data.pose.pose.position.x
-    r1.y = data.pose.pose.position.y
+            print(robot.name + " waiting at point " + str(robot.pathid) + " for " + str(robot.goal_duration - abs(gazebo_time - robot.actiontime)) + " seconds")            
+            robot.speed.angular.z = angularVel((robot.path[robot.pathid+1][2], robot.path[robot.pathid+1][3]), robot.x, robot.y, robot.yaw, 2.5)
+            robot.speed.linear.x = 0
+            robot.publisher.publish(robot.speed)
+                        
+                    
+def odom_callback(data, robot):
+    robot.x = data.pose.pose.position.x
+    robot.y = data.pose.pose.position.y
     (roll, pitch, yaw) = euler_from_quaternion([data.pose.pose.orientation.x, data.pose.pose.orientation.y, 
                                                 data.pose.pose.orientation.z, data.pose.pose.orientation.w])
-    r1.yaw = yaw
-    
-def cbpose2(data):
-    global r2
-    r2.x = data.pose.pose.position.x
-    r2.y = data.pose.pose.position.y
-    (roll, pitch, yaw) = euler_from_quaternion([data.pose.pose.orientation.x, data.pose.pose.orientation.y, 
-                                                data.pose.pose.orientation.z, data.pose.pose.orientation.w])
-    r2.yaw = yaw
-    
-def cbpose3(data):
-    global r3
-    r3.x = data.pose.pose.position.x
-    r3.y = data.pose.pose.position.y
-    (roll, pitch, yaw) = euler_from_quaternion([data.pose.pose.orientation.x, data.pose.pose.orientation.y, 
-                                                data.pose.pose.orientation.z, data.pose.pose.orientation.w])
-    r3.yaw = yaw
+    #turn negative yaw values into positive ones
+    yaw = yaw % (2 * math.pi)
+    robot.yaw = yaw
 
-def map_callback(data):
-    global map
-    # print(data.info.width, data.info.height, data.info.resolution)
-    map.width = data.info.width
-    map.height = data.info.height
-    map.originx = data.info.origin.position.x
-    map.originy = data.info.origin.position.y
-    map.resolution = 0.05
     
 if __name__ == '__main__':
+    filepath = "../misc/grid_task_log.xml"
+    tr = TaskReader()
+    tasks, agents = tr.read_xml(filepath)
     rospy.init_node('path_demo')
-    rate = rospy.Rate(10)    
+    rate = rospy.Rate(100)    
+    init_time = gazebo_time
     while not rospy.is_shutdown():
        # Initializes a rospy node to let the SimpleActionClient publish and subscribe 
-        map_sub = rospy.Subscriber('/map', OccupancyGrid, map_callback)       
-        sub1 = rospy.Subscriber('/robot1/ground_truth/state', Odometry, cbpose1)
-        sub2 = rospy.Subscriber('/robot2/ground_truth/state', Odometry, cbpose2)
-        sub3 = rospy.Subscriber('/robot3/ground_truth/state', Odometry, cbpose3)        
+        map_sub = rospy.Subscriber('/map', OccupancyGrid, utils.map_callback, map) 
+        gazebo_time_sub = rospy.Subscriber('/gazebo/performance_metrics', PerformanceMetrics, gazebo_time_callback, gazebo_time)  
+        # print("gazebo time: ", gazebo_time)
+        # if setup and (map.resolution != 0 and map.originx != 0 and map.originy != 0 ):
         if setup:
-            # path_demo()
-            setupRobots()
+            setupRobots(tasks, agents.__len__())
+            # path_demo() 
             setup = False
-        if(map.resolution != 0):
+        if(map.resolution != 0 and map.originx != 0 and map.originy != 0 ):
             #iterate through all robots in robots vector, if they are not at their goal, move them
             for robot in robots:
-                if(robot.index < len(robot.path) -1):
+                rospy.Subscriber(robot.name+'/ground_truth/state', Odometry, odom_callback, robot)
+                if(robot.pathid < len(robot.path)):
                     moveRobot(robot)
+                    # print(len(robot.path))
+                    # print(robot.id)
                 else:
                     robot.stop()  
         rate.sleep()

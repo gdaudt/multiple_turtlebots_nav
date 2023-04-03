@@ -1,0 +1,209 @@
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+11.552
+14.259
+14.765
+18.35
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+11.29
+14.686999999999998
+15.046
+18.006999999999998
+20.035999999999998
+30.215999999999998
+33.618
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+11.017999999999999
+13.941
+14.819999999999999
+17.192999999999998
+20.854
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+11.447
+time is  3.6190000000000007  expected duration:  2.5455844122715714
+time is  6.236  expected duration:  1.7999999999999996
+time is  6.236  expected duration:  3.9088311754568585
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+67.526911934581179
+12.656854249492381
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+time is  39.276  expected duration:  2.5455844122715714
+time is  73.73499999999999  expected duration:  1.7999999999999996
+time is  71.41999999999999  expected duration:  3.9088311754568585
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+11.277999999999999
+robot actiontime is  4.473
+robot init_time is  0
+time is  3.7169999999999996  expected duration:  2.5455844122715714
+robot actiontime is  3.7169999999999996
+robot init_time is  0
+time is  6.242  expected duration:  1.7999999999999996
+robot actiontime is  6.242
+robot init_time is  0
+time is  6.242  expected duration:  3.9088311754568585
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+robot actiontime is  0
+robot init_time is  0
+time is  3.6949999999999994  expected duration:  2.5455844122715714
+robot actiontime is  3.6949999999999994
+robot init_time is  0
+time is  6.31  expected duration:  1.7999999999999996
+robot actiontime is  6.31
+robot init_time is  0
+time is  6.31  expected duration:  3.9088311754568585
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+robot actiontime is  0
+robot init_time is  0
+time is  3.4370000000000003  expected duration:  2.5455844122715714
+robot actiontime is  3.4370000000000003
+robot init_time is  0
+time is  2.5409999999999995  expected duration:  1.7999999999999996
+robot actiontime is  5.978
+robot init_time is  0
+time is  0.18299999999999983  expected duration:  3.9088311754568585
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+11.545
+14.755
+15.627999999999998
+18.022
+21.982
+22.558999999999997
+30.452999999999996
+31.741999999999997
+robot actiontime is  0.0
+robot init_time is  0
+time is  3.599  expected duration:  2.5455844122715714
+robot actiontime is  3.599
+robot init_time is  0
+time is  2.5939999999999994  expected duration:  1.7999999999999996
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.1899999999999995  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.1899999999999995  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.3780000000000001  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.3780000000000001  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.5630000000000006  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.5630000000000006  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.7469999999999999  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.7469999999999999  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  0.9310000000000009  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.1140000000000008  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.1140000000000008  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.290000000000001  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.290000000000001  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.4700000000000006  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.4700000000000006  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.6560000000000006  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.6560000000000006  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  1.8339999999999996  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.011000000000001  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.011000000000001  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.1980000000000004  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.1980000000000004  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.3810000000000002  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.3810000000000002  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.558  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.558  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.737000000000002  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.737000000000002  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  2.9220000000000006  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.096  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.096  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.282  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.282  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.4669999999999987  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.4669999999999987  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.6359999999999992  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.808  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.808  expected duration:  3.9088311754568585
+robot actiontime is  6.193
+robot init_time is  0
+time is  3.9810000000000016  expected duration:  3.9088311754568585
+robot actiontime is  10.174000000000001
+robot init_time is  0
+time is  4.760999999999999  expected duration:  2.545584412271571
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+11.418000000000001
+14.290999999999999
+15.369000000000002
+20.073999999999998
+20.584000000000003
+22.139
+26.03
+31.610999999999997
+32.963
+67.526911934581179
+12.656854249492381

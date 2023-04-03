@@ -1,0 +1,15 @@
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+4.024
+13.975999999999999
+['move_demo_single.py 1', 'move_demo_single.py 2', 'move_demo_single.py 3', 'move_demo_single.py 4', 'move_demo_single.py 5', 'move_demo_single.py 6', 'move_demo_single.py 7', 'move_demo_single.py 8', 'move_demo_single.py 9']
+3.9800000000000004
+12.131
+14.951
+25.55
+26.401
+27.098
+27.648000000000003
+40.269
+47.931
+63.284271247461916
+11.656854249492381

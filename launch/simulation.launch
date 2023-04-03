@@ -2,7 +2,7 @@
     <param name="/use_sim_time" value="true" />
     <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find multiple_turtlebots_nav)/worlds/empty_world.world"/>
+        <!-- <arg name="world_name" value="$(find multiple_turtlebots_nav)/worlds/warehouse_simple.world"/> -->
         <!-- more default parameters can be changed here -->
         <arg name="paused" value="false"/>
         <arg name="use_sim_time" value="true"/>
@@ -15,8 +15,8 @@
     <include file="$(find multiple_turtlebots_nav)/launch/generated_robots.launch"/>
 
      <!-- launch the overall visualization on rviz -->
-    <node pkg="rviz" type="rviz" name="rviz" required="true"
-          args="-d $(find multiple_turtlebots_nav)/navigation/multiple_turtlebots.rviz"/>
+    <!-- <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find multiple_turtlebots_nav)/navigation/multiple_turtlebots.rviz"/> -->
 
 
     <!-- rostopic pub /robot1/move_base_simple/goal geometry_msgs/PoseStamped '{header: {stamp: now, frame_id: "map"}, pose: {position: {x: 7.0, y: 1.0, z: 0.0}, orientation: {w: 1.0}}}'
